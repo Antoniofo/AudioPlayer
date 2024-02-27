@@ -12,6 +12,6 @@ namespace AudioPlayer
         public bool IsEnabled { get; set; } = true;
         public bool Debug { get; set; } = false;
 
-        public string path { get; set; } = "/home/container/.config/EXILED/Configs/audio/ntf.ogg";
+        public string path { get; set; } = "/home/container/.config/EXILED/Configs/audio";
     }
 }

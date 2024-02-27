@@ -28,6 +28,7 @@ namespace AudioPlayer
 
         public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();
 
+	public static int Ids = 999;
 
         public override void OnEnabled()
         {
@@ -46,6 +47,7 @@ namespace AudioPlayer
 
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
         {
+	    AudioPlayers.Remove(playerBase.Owner);
             foreach (var player in AudioPlayers)
             {
                 if (!player) continue;
@@ -68,7 +70,6 @@ namespace AudioPlayer
                 //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);
                 //NetworkServer.Destroy(player.gameObject);
             }
-            AudioPlayers.Clear();
 
         }
 
@@ -84,19 +85,27 @@ namespace AudioPlayer
         {
             if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
             {                
-                if (AudioPlayers.Count > 0)
+                if (AudioPlayers.Where(x => x.PlayerIsConnected(x.Owner)).Count > 0)
                     return;
-                var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
-                FakeConnection fakeConnection = new FakeConnection(999);
-                var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
-                NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
-
-                hubPlayer.nicknameSync.Network_myNickSync = "Facility Announcement";
-                AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
-                AudioPlayers.Add(hubPlayer);
-                audioPlayer.Enqueue(Config.path, -1);
-                audioPlayer.Play(0);
+		Plugin.PlaySound(Config.path, "Facility Announcement", 998);
             }
         }
+	
+	public static void PlaySound(string soundName, botName, id = Plugins.Ids)
+	{
+	    string fullPath = Path.Combine(Config.path,soundName);
+            var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
+            FakeConnection fakeConnection = new FakeConnection(Plugin.Ids++);
+            var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
+            NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
+
+            hubPlayer.nicknameSync.Network_myNickSync = botName;
+            AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
+            AudioPlayers.Add(hubPlayer);
+            audioPlayer.Enqueue(fullPath, -1);
+            audioPlayer.Play(0);
+
+
+	}
     }
 }

@@ -306,6 +306,7 @@
     <Compile Include="FakeConnection.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Plugin.cs" />
+    <Compile Include="PlaySound.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
