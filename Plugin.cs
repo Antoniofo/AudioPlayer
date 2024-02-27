@@ -29,16 +29,18 @@ namespace AudioPlayer
 
         public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();
 
-	public static int Ids = 999;
+        public int Ids = 999;
+
+        public static Plugin instance;
 
         public override void OnEnabled()
         {
             base.OnEnabled();
             SCPSLAudioApi.Startup.SetupDependencies();
-
+            Plugin.instance = this;
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
-            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
+            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;            
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
@@ -48,35 +50,31 @@ namespace AudioPlayer
 
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
         {
-	    AudioPlayers.Remove(playerBase.Owner);
-            foreach (var player in AudioPlayers)
+            var player = playerBase.Owner;
+
+            if (playerBase.CurrentPlay != null)
             {
-                if (!player) continue;
-                var audioPlayer = AudioPlayerBase.Get(player);
-                if (!audioPlayer) continue;
-
-                if (audioPlayer.CurrentPlay != null)
-                {
-                    audioPlayer.Stoptrack(true);
-                    audioPlayer.OnDestroy();
-                }
-
-                player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
-                Timing.CallDelayed(0.5f, () =>
-                {
-                    NetworkServer.Destroy(player.gameObject);
-                });
-                //NetworkConnectionToClient conn = player.connectionToClient;
-                //player.OnDestroy();
-                //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);
-                //NetworkServer.Destroy(player.gameObject);
+                playerBase.Stoptrack(true);
+                playerBase.OnDestroy();
             }
 
+            player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
+            Timing.CallDelayed(0.5f, () =>
+            {
+                NetworkServer.Destroy(player.gameObject);
+            });
+            //NetworkConnectionToClient conn = player.connectionToClient;
+            //player.OnDestroy();
+            //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);
+            //NetworkServer.Destroy(player.gameObject);
+
+            AudioPlayers.Remove(playerBase.Owner);
         }
 
         public override void OnDisabled()
         {
             base.OnDisabled();
+            Plugin.instance = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
@@ -85,18 +83,36 @@ namespace AudioPlayer
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
             if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
-            {                
-                if (AudioPlayers.Where(x => x.PlayerIsConnected(x.Owner)).Count > 0)
-                    return;
-		Plugin.PlaySound(Config.path, "Facility Announcement", 998);
+            {
+                foreach (var player in AudioPlayers)
+                {
+                    if (AudioPlayers.Where(x => x == player).Count() > 0)
+                        return;
+                }
+
+                PlaySound("mtf.ogg", "Facility Announcement", 998);
+            }
+            else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency)
+            {
+                foreach (var player in AudioPlayers)
+                {
+                    if (AudioPlayers.Where(x => x == player).Count() > 0)
+                        return;
+                }
+                PlaySound("chaos.ogg", "Facility Announcement", 998);
             }
         }
-	
-	public static void PlaySound(string soundName, botName, id = Plugins.Ids)
-	{
-	    string fullPath = Path.Combine(Config.path,soundName);
+
+        public void PlaySound(string soundName, string botName, int id = -1)
+        {
+            if (id == -1)
+            {
+                id = Ids++;
+            }
+
+            string fullPath = Path.Combine(Config.path, soundName);
             var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
-            FakeConnection fakeConnection = new FakeConnection(Plugin.Ids++);
+            FakeConnection fakeConnection = new FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
             NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
 
@@ -107,6 +123,6 @@ namespace AudioPlayer
             audioPlayer.Play(0);
 
 
-	}
+        }
     }
 }

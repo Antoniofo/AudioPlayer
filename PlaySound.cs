@@ -23,14 +23,14 @@ namespace AudioPlayer
 
         public string[] Usage { get; } = new string[3]
         {
-	    "play/list",
+            "play/list",
             "audioName",
-	    "displayName"
+            "displayName"
         };
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-	    if (!sender.CheckPermission("AudioPlayer"))
+            if (!sender.CheckPermission("AudioPlayer"))
             {
                 response = "You don't have the permission";
                 return false;
@@ -41,34 +41,36 @@ namespace AudioPlayer
                 return false;
             }
 
-	    switch (argumentss.At(0))
-	    {
-	        case "list":
-		    string[] files = Directory.GetFiles(Config.path);
-		    string listSound = "Here are the current available sounds : \n"
-		    foreach (string file in files) {
-			listSound += "- "file + "\n"
-		    }
-		    response = listSound
-		    return true;
-		case "play" :
-		    if (arguments.Count < 3)
-		    {
-			response = "Not enough argument to play a sound"
-			return false;
-		    }
-		    
-		    string sound = Path.Combine(Config.path, arguments.At(1));
-		    string displayName = arguments.At(2);
+            switch (arguments.At(0))
+            {
+                case "list":
+                    string[] files = Directory.GetFiles(Plugin.instance.Config.path);
+                    string listSound = "Here are the current available sounds : \n";
+                    foreach (string file in files)
+                    {
+                        listSound += "- " + Path.GetFileName(file) + "\n";
+                    }
+                    response = listSound;
+                    return true;
+                case "play":
+                    if (arguments.Count < 3)
+                    {
+                        response = "Not enough argument to play a sound";
+                        return false;
+                    }
 
-		    Plugin.PlaySound(sound, displayName);
-		    response = "Playing ..."
-		    return true;
-		default:
+                    string sound = Path.Combine(Plugin.instance.Config.path, arguments.At(1));
+                    string displayName = arguments.At(2);
+
+                    Plugin.instance.PlaySound(sound, displayName, -1);
+                    response = "Playing ...";
+                    return true;
+                default:
                     response = "No subcommand recognized";
                     return false;
 
-	    }
-		
-	}
+            }
+
+        }
+    }
 }
