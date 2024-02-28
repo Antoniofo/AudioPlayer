@@ -51,7 +51,7 @@ namespace AudioPlayer
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
         {
             var player = playerBase.Owner;
-
+            Log.Info("Track Finished");
             if (playerBase.CurrentPlay != null)
             {
                 playerBase.Stoptrack(true);
@@ -67,8 +67,21 @@ namespace AudioPlayer
             //player.OnDestroy();
             //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);
             //NetworkServer.Destroy(player.gameObject);
-
-            AudioPlayers.Remove(playerBase.Owner);
+            var hub = AudioPlayers.Where(x => x.PlayerId == playerBase.Owner.PlayerId).FirstOrDefault();
+            if (hub != null)
+            {
+                AudioPlayers.Remove(hub);
+            }
+            
+            foreach(var pla in AudioPlayers)
+            {
+                var audioplayer = AudioPlayerBase.Get(pla);
+                if(audioplayer.CurrentPlay == null)
+                {
+                    AudioPlayers.Remove(pla);                    
+                }
+                Log.Info(pla.PlayerId);
+            }
         }
 
         public override void OnDisabled()
@@ -82,10 +95,13 @@ namespace AudioPlayer
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
+            Log.Info("Respawn");
             if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
             {
+                Log.Info("MTF");
                 foreach (var player in AudioPlayers)
                 {
+                    Log.Info(AudioPlayers.Count + " " + AudioPlayers);
                     if (AudioPlayers.Where(x => x == player).Count() > 0)
                         return;
                 }
@@ -94,8 +110,10 @@ namespace AudioPlayer
             }
             else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency)
             {
+                Log.Info("Chaos");
                 foreach (var player in AudioPlayers)
                 {
+                    Log.Info(AudioPlayers.Count + " "+ AudioPlayers);
                     if (AudioPlayers.Where(x => x == player).Count() > 0)
                         return;
                 }
@@ -103,8 +121,9 @@ namespace AudioPlayer
             }
         }
 
-        public void PlaySound(string soundName, string botName, int id = -1)
+        public void PlaySound(string soundName, string botName, int id = -1, float volume = 20f)
         {
+            Log.Info("playsound "+ id);
             if (id == -1)
             {
                 id = Ids++;
@@ -115,11 +134,12 @@ namespace AudioPlayer
             FakeConnection fakeConnection = new FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
             NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
-
+            Log.Info("after connecting fake player");
             hubPlayer.nicknameSync.Network_myNickSync = botName;
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
-            AudioPlayers.Add(hubPlayer);
+            AudioPlayers.Add(hubPlayer);           
             audioPlayer.Enqueue(fullPath, -1);
+            audioPlayer.Volume = volume;
             audioPlayer.Play(0);
 
 

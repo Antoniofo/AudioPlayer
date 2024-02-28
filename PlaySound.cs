@@ -62,7 +62,7 @@ namespace AudioPlayer
                     string sound = Path.Combine(Plugin.instance.Config.path, arguments.At(1));
                     string displayName = arguments.At(2);
 
-                    Plugin.instance.PlaySound(sound, displayName, -1);
+                    Plugin.instance.PlaySound(sound, displayName);
                     response = "Playing ...";
                     return true;
                 default:
