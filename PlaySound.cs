@@ -25,7 +25,8 @@ namespace AudioPlayer
         {
             "play/list",
             "audioName",
-            "displayName"
+            "displayName",
+            "[volume]"
         };
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
@@ -61,8 +62,22 @@ namespace AudioPlayer
 
                     string sound = Path.Combine(Plugin.instance.Config.path, arguments.At(1));
                     string displayName = arguments.At(2);
+                    
+                    if (arguments.Count == 4){
+                        try{
+                            float volume;
+                            float.TryParse(arguments.At(3), out volume);
+                            Plugin.instance.PlaySound(sound, displayName, volume:volume);
+                        }catch(Exception ex){
+                            response = "Volume badly sent";
+                            return false;
+                        }
+                        
+                    }else{
+                        Plugin.instance.PlaySound(sound, displayName);
+                    }
 
-                    Plugin.instance.PlaySound(sound, displayName);
+
                     response = "Playing ...";
                     return true;
                 default:
