@@ -1,6 +1,6 @@
 [![Release]][Link]
 <!----------------------------------------------------------------------------->
-[Link]: # 'https://github.com/Antoniofo/AudioPlayer/releases'
+[Link]: https://github.com/Antoniofo/AudioPlayer/releases
 <!---------------------------------[ Buttons ]--------------------------------->
 [Release]: https://img.shields.io/badge/Release-EFFDE?style=for-the-badge&logoColor=white&logo=DocuSign
 
