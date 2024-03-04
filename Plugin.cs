@@ -38,7 +38,13 @@ namespace AudioPlayer
             Plugin.instance = this;
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
-            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;            
+            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
+            Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
+        }
+
+        private void OnRoundStart()
+        {
+            AudioPlayers.Clear();
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
@@ -60,11 +66,15 @@ namespace AudioPlayer
                 playerBase.OnDestroy();
             }
 
-            player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
-            Timing.CallDelayed(0.5f, () =>
+            if(player.gameObject != null)
             {
-                NetworkServer.Destroy(player.gameObject);
-            });
+                player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
+                Timing.CallDelayed(0.5f, () =>
+                {
+                    NetworkServer.Destroy(player.gameObject);
+                });
+            }            
+            
             //NetworkConnectionToClient conn = player.connectionToClient;
             //player.OnDestroy();
             //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);

@@ -3,10 +3,12 @@ using System.IO;
 using CommandSystem;
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
+using SCPSLAudioApi.AudioCore;
 using UnityEngine;
 using MapGeneration;
 using PlayerRoles;
 using RemoteAdmin;
+using System.Linq;
 
 namespace AudioPlayer
 
@@ -71,13 +73,13 @@ namespace AudioPlayer
                         return false;
                     }
                 case "stop":
-                    foreach (var player in AudioPlayers)
+                    foreach (var player in Plugin.AudioPlayers)
                     {
-                        Log.Info(AudioPlayers.Count + " "+ AudioPlayers);
-                        if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")))
+                        Log.Info(Plugin.AudioPlayers.Count + " "+ Plugin.AudioPlayers);
+                        if (Plugin.AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")))
                             continue;
                         var audioPlayer = AudioPlayerBase.Get(player);
-                        Plugin.Stop(audioPlayer);
+                        Plugin.instance.Stop(audioPlayer);
                     }
                     response = "Sounds Stoped";
                     return true;
