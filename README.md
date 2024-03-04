@@ -16,7 +16,7 @@ Open your Remote Admin Console and write:
 
 ``audio`` 
 
-Usage: audio <play/list> [audioName] [displayName] [[volume]]
+Usage: audio <play/list/stop> [audioName] [displayName] [[volume]]
 
 # Permission
 
