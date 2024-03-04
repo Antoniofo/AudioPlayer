@@ -13,20 +13,19 @@ namespace AudioPlayer
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
 
-    public class ChangeLight : ICommand, IUsageProvider
+    public class PlaySound : ICommand, IUsageProvider
     {
         public string Command => "audioplayer";
 
         public string[] Aliases => new[] { "audio" };
 
-        public string Description => "play an audio";
+        public string Description => "play/list/stop an audio";
 
         public string[] Usage { get; } = new string[3]
         {
-            "play/list",
+            "play/list/stop",
             "audioName",
-            "displayName",
-            "[volume]"
+            "displayName"            
         };
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
@@ -62,23 +61,25 @@ namespace AudioPlayer
 
                     string sound = Path.Combine(Plugin.instance.Config.path, arguments.At(1));
                     string displayName = arguments.At(2);
-                    
-                    if (arguments.Count == 4){
-                        try{
-                            float volume;
-                            float.TryParse(arguments.At(3), out volume);
-                            Plugin.instance.PlaySound(sound, displayName, volume:volume);
-                        }catch(Exception ex){
-                            response = "Volume badly sent";
-                            return false;
-                        }
-                        
+                                        
+                    bool ret = Plugin.instance.PlaySound(sound, displayName, 99);
+                    if (ret){
+                        response = "Playing ...";
+                        return true;
                     }else{
-                        Plugin.instance.PlaySound(sound, displayName);
+                        response = "Last sound not finished";
+                        return false;
                     }
-
-
-                    response = "Playing ...";
+                case "stop":
+                    foreach (var player in AudioPlayers)
+                    {
+                        Log.Info(AudioPlayers.Count + " "+ AudioPlayers);
+                        if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")))
+                            continue;
+                        var audioPlayer = AudioPlayerBase.Get(player);
+                        Plugin.Stop(audioPlayer);
+                    }
+                    response = "Sounds Stoped";
                     return true;
                 default:
                     response = "No subcommand recognized";

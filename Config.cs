@@ -13,5 +13,12 @@ namespace AudioPlayer
         public bool Debug { get; set; } = false;
 
         public string path { get; set; } = "/home/container/.config/EXILED/Configs/audio";
+
+        public string mtfSound {get; set;} = "mtf.ogg";
+
+        public string chaosSound {get; set;} = "chaos.ogg";
+
+        [Description("Do not put over 100 because it could break the VoiceChat for everyplayer and they'll have to restart SL")]
+        public float volume {get; set;} = 20f;
     }
 }
