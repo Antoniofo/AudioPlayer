@@ -81,7 +81,7 @@
       <HintPath>packages\EXILED.8.8.0\lib\net48\PluginAPI.dll</HintPath>
     </Reference>
     <Reference Include="SCPSLAudioApi">
-      <HintPath>C:\Users\Admin\Desktop\Game_Servers\SCPSLAudioApi.dll</HintPath>
+      <HintPath>.\lib\SCPSLAudioApi.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
