@@ -7,7 +7,9 @@
 
 # Installation:
 
-You can install this plugin, download the [.dll](https://github.com/Antoniofo/AudioPlayer/releases) file and placing it in ``%AppData%\Roaming\EXILED\Plugins``
+You will need the [SCPSLAudioAPI.dll](https://github.com/CedModV2/SCPSLAudioApi/releases) along with this plugin to work. Place it in the same folder as the AudioPlayer.dll
+
+You can install this plugin, download the [.dll](https://github.com/Antoniofo/AudioPlayer/releases) file and placing it in ``%AppData%\Roaming\EXILED\Plugins`` (Windows) or ``~/.config/EXILED/Plugins`` (Linux)
 
 
 # How to use ?
