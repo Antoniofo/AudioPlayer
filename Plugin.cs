@@ -31,13 +31,14 @@ namespace AudioPlayer
 
         public static Plugin instance;
 
-        public List<int> MutedAnnounce = new List<int>();
+        public List<string> MutedAnnounce;
 
         public override void OnEnabled()
         {
             base.OnEnabled();
             SCPSLAudioApi.Startup.SetupDependencies();
             Plugin.instance = this;
+            MutedAnnounce = new List<string>();
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
@@ -46,8 +47,7 @@ namespace AudioPlayer
 
         private void OnRoundStart()
         {
-            AudioPlayers.Clear();
-            MutedAnnounce.Clear();            
+            AudioPlayers.Clear();               
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
@@ -103,6 +103,7 @@ namespace AudioPlayer
         {
             base.OnDisabled();
             Plugin.instance = null;
+            MutedAnnounce = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
@@ -146,7 +147,7 @@ namespace AudioPlayer
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
             audioPlayer.Volume = Config.volume;
-            foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.Id)))
+            foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.UserId)))
             {
                 audioPlayer.BroadcastTo.Add(player.Id);
             }

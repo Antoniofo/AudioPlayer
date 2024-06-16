@@ -27,10 +27,10 @@ namespace AudioPlayer
                 response = "Player not found (You are you !?)";
                 return false;
             }
-            int plyID = ply.Id;
+            string plyID = ply.UserId;
             if (Plugin.instance.MutedAnnounce.Contains(plyID))
             {
-                Plugin.instance.MutedAnnounce.Remove(plyID);             
+                Plugin.instance.MutedAnnounce.Remove(plyID);     
                 
             }
             else
