@@ -23,13 +23,15 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(1, 1, 0);
+        public override Version Version => new Version(1, 2, 0);
 
         public override string Prefix => "audioplayer";
 
         public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();        
 
         public static Plugin instance;
+
+        public List<int> MutedAnnounce = new List<int>();
 
         public override void OnEnabled()
         {
@@ -45,6 +47,7 @@ namespace AudioPlayer
         private void OnRoundStart()
         {
             AudioPlayers.Clear();
+            MutedAnnounce.Clear();            
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
@@ -59,7 +62,7 @@ namespace AudioPlayer
 
         public void Stop(AudioPlayerBase playerBase){
             var player = playerBase.Owner;
-            Log.Info("Track Finished");
+            Log.Debug("Track Finished");
             if (playerBase.CurrentPlay != null)
             {
                 playerBase.Stoptrack(true);
@@ -92,7 +95,7 @@ namespace AudioPlayer
                 {
                     AudioPlayers.Remove(pla);                    
                 }
-                Log.Info(pla.PlayerId);
+                Log.Debug(pla.PlayerId);
             }
         }
 
@@ -107,16 +110,16 @@ namespace AudioPlayer
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
-            Log.Info("Respawn");
+            Log.Debug("Respawn");
             if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
             {
-                Log.Info("MTF");
+                Log.Debug("MTF");
 
                 PlaySound(Config.mtfSound, "Facility Announcement", 998);
             }
             else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency)
             {
-                Log.Info("Chaos");
+                Log.Debug("Chaos");
                 
                 PlaySound(Config.chaosSound, "Facility Announcement", 998);
             }
@@ -124,10 +127,10 @@ namespace AudioPlayer
 
         public bool PlaySound(string soundName, string botName, int id)
         {
-            Log.Info("playsound "+ id);       
+            Log.Debug("playsound "+ id);       
             foreach (var player in AudioPlayers)
             {
-                Log.Info(AudioPlayers.Count + " "+ AudioPlayers);
+                Log.Debug(AudioPlayers.Count + " "+ AudioPlayers);
                 if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName)))
                     return false;
             }
@@ -137,12 +140,21 @@ namespace AudioPlayer
             FakeConnection fakeConnection = new FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
             NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
-            Log.Info("after connecting fake player");
+            Log.Debug("after connecting fake player");
             hubPlayer.nicknameSync.Network_myNickSync = botName;
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
             audioPlayer.Volume = Config.volume;
+            foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.Id)))
+            {
+                audioPlayer.BroadcastTo.Add(player.Id);
+            }
+            audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);
+            foreach (var pl in audioPlayer.BroadcastTo)
+            {
+                Log.Debug(pl);
+            }
             audioPlayer.Play(0);
             return true;
 

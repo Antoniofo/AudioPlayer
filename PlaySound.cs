@@ -15,13 +15,14 @@ namespace AudioPlayer
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
 
-    public class PlaySound : ICommand, IUsageProvider
+    public class PlaySound : ParentCommand, IUsageProvider
     {
-        public string Command => "audioplayer";
+        public PlaySound() => LoadGeneratedCommands();
+        public override string Command => "audioplayer";
 
-        public string[] Aliases => new[] { "audio" };
+        public override string[] Aliases => new[] { "audio" };
 
-        public string Description => "play/list/stop an audio";
+        public override string Description => "play/list/stop an audio";
 
         public string[] Usage { get; } = new string[3]
         {
@@ -30,7 +31,11 @@ namespace AudioPlayer
             "displayName"            
         };
 
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        public override void LoadGeneratedCommands()
+        {            
+        }
+
+        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!sender.CheckPermission("AudioPlayer"))
             {
@@ -75,7 +80,7 @@ namespace AudioPlayer
                 case "stop":
                     foreach (var player in Plugin.AudioPlayers)
                     {
-                        Log.Info(Plugin.AudioPlayers.Count + " "+ Plugin.AudioPlayers);
+                        Log.Debug(Plugin.AudioPlayers.Count + " "+ Plugin.AudioPlayers);
                         if (Plugin.AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")))
                             continue;
                         var audioPlayer = AudioPlayerBase.Get(player);
