@@ -9,6 +9,8 @@ using MapGeneration;
 using PlayerRoles;
 using RemoteAdmin;
 using System.Linq;
+using System.Collections.Generic;
+using Mirror;
 
 namespace AudioPlayer
 
@@ -22,13 +24,13 @@ namespace AudioPlayer
 
         public override string[] Aliases => new[] { "audio" };
 
-        public override string Description => "play/list/stop an audio";
+        public override string Description => "play/playurl/list/stop an audio";
 
         public string[] Usage { get; } = new string[3]
         {
             "play/list/stop",
             "audioName",
-            "displayName"            
+            "displayName"
         };
 
         public override void LoadGeneratedCommands()
@@ -44,14 +46,14 @@ namespace AudioPlayer
             }
             if (arguments.Count <= 0)
             {
-                response = "No arguments given";
+                response = "No arguments given\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
                 return false;
             }
 
             switch (arguments.At(0))
             {
                 case "list":
-                    string[] files = Directory.GetFiles(Plugin.instance.Config.path);
+                    string[] files = Directory.GetFiles(Plugin.instance.Config.AudioFilePath);
                     string listSound = "Here are the current available sounds : \n";
                     foreach (string file in files)
                     {
@@ -62,34 +64,51 @@ namespace AudioPlayer
                 case "play":
                     if (arguments.Count < 3)
                     {
-                        response = "Not enough argument to play a sound";
+                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
                         return false;
                     }
 
-                    string sound = Path.Combine(Plugin.instance.Config.path, arguments.At(1));
+                    string sound = Path.Combine(Plugin.instance.Config.AudioFilePath, arguments.At(1));
                     string displayName = arguments.At(2);
                                         
-                    bool ret = Plugin.instance.PlaySound(sound, displayName, 99);
+                    bool ret = Plugin.instance.PlaySound(sound, displayName, 99, false);
                     if (ret){
                         response = "Playing ...";
                         return true;
                     }else{
-                        response = "Last sound not finished";
+                        response = "Last sound not finished or file doesn't exist";
                         return false;
                     }
-                case "stop":
-                    foreach (var player in Plugin.AudioPlayers)
+                case "playurl":
+                    if (arguments.Count < 3)
                     {
-                        Log.Debug(Plugin.AudioPlayers.Count + " "+ Plugin.AudioPlayers);
-                        if (Plugin.AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")))
-                            continue;
-                        var audioPlayer = AudioPlayerBase.Get(player);
-                        Plugin.instance.Stop(audioPlayer);
+                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
+                        return false;
                     }
+                    string urlsound = arguments.At(1);
+                    string urldisplayName = arguments.At(2);
+                    bool urlret = Plugin.instance.PlaySound(urlsound, urldisplayName, 98, true);
+                    if (urlret)
+                    {
+                        response = "Playing ...";
+                        return true;
+                    }
+                    else
+                    {
+                        response = "Last sound not finished or file doesn't exist";
+                        return false;
+                    }
+                case "stop":                    
+                    List<ReferenceHub> listofshit = Plugin.AudioPlayers.Where(x => !x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")).ToList();                    
+                    for (int i = 0; i < listofshit.Count; i++)
+                    {
+                        var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
+                        Plugin.instance.Stop(audioPlayer);
+                    }                    
                     response = "Sounds Stoped";
                     return true;
                 default:
-                    response = "No subcommand recognized";
+                    response = "No subcommand recognized\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
                     return false;
 
             }

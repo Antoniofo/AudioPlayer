@@ -23,7 +23,7 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(1, 2, 0);
+        public override Version Version => new Version(1, 3, 0);
 
         public override string Prefix => "audioplayer";
 
@@ -40,9 +40,20 @@ namespace AudioPlayer
             Plugin.instance = this;
             MutedAnnounce = new List<string>();
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
-            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
+            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;            
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
+        }
+
+        public override void OnDisabled()
+        {
+            base.OnDisabled();
+            Plugin.instance = null;
+            MutedAnnounce = null;
+            Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
+            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
+            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
+            Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStart;
         }
 
         private void OnRoundStart()
@@ -52,15 +63,17 @@ namespace AudioPlayer
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
         {
-            obj.IsAllowed = false;
+            if(Config.PlayMtfSound)
+                obj.IsAllowed = false;
         }
 
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
         {
             Stop(playerBase);
+                       
         }
 
-        public void Stop(AudioPlayerBase playerBase){
+        public void Stop(AudioPlayerBase playerBase){            
             var player = playerBase.Owner;
             Log.Debug("Track Finished");
             if (playerBase.CurrentPlay != null)
@@ -94,59 +107,53 @@ namespace AudioPlayer
                 if(audioplayer.CurrentPlay == null)
                 {
                     AudioPlayers.Remove(pla);                    
-                }
-                Log.Debug(pla.PlayerId);
+                }                
             }
-        }
-
-        public override void OnDisabled()
-        {
-            base.OnDisabled();
-            Plugin.instance = null;
-            MutedAnnounce = null;
-            Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
-            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
-            Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
-        }
+        }        
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
             Log.Debug("Respawn");
-            if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox)
+            if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox && Config.PlayMtfSound)
             {
                 Log.Debug("MTF");
 
-                PlaySound(Config.mtfSound, "Facility Announcement", 998);
+                PlaySound(Config.MtfSoundFilePath, "Facility Announcement", 998, false);
             }
-            else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency)
+            else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency && Config.PlayChaosSound)
             {
                 Log.Debug("Chaos");
                 
-                PlaySound(Config.chaosSound, "Facility Announcement", 998);
+                PlaySound(Config.ChaosSoundFilePath, "Facility Announcement", 998, false);
             }
         }
 
-        public bool PlaySound(string soundName, string botName, int id)
+        public bool PlaySound(string soundName, string botName, int id, bool url)
         {
-            Log.Debug("playsound "+ id);       
+            Log.Debug("playsound "+ id);
             foreach (var player in AudioPlayers)
             {
-                Log.Debug(AudioPlayers.Count + " "+ AudioPlayers);
-                if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName)))
+                Log.Debug("audioplayers: " + AudioPlayers.Count);
+                if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName) && AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
                     return false;
-            }
+            }           
 
-            string fullPath = Path.Combine(Config.path, soundName);
+            string fullPath =  url ? soundName : Path.Combine(Config.AudioFilePath, soundName);
+            if (!File.Exists(fullPath) && !url)
+            {
+                return false;
+            }
             var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
-            FakeConnection fakeConnection = new FakeConnection(id);
+            Exiled.API.Features.Components.FakeConnection fakeConnection = new Exiled.API.Features.Components.FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
-            NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
-            Log.Debug("after connecting fake player");
+            NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);            
+
             hubPlayer.nicknameSync.Network_myNickSync = botName;
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
-            audioPlayer.Volume = Config.volume;
+            audioPlayer.Volume = Config.Volume;
+            audioPlayer.AllowUrl = url;
             foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.UserId)))
             {
                 audioPlayer.BroadcastTo.Add(player.Id);
@@ -157,6 +164,17 @@ namespace AudioPlayer
                 Log.Debug(pl);
             }
             audioPlayer.Play(0);
+
+            //Cleanup audioplayer that crashes cause i didn't find a way to use the audioapi to error handle that
+            List<ReferenceHub> listofshit = AudioPlayers.Where(x => !x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")).ToList();
+            for (int i = 0; i < listofshit.Count; i++)
+            {
+                var audioPlayerToStop = AudioPlayerBase.Get(listofshit[i]);
+                if (!audioPlayerToStop.PlaybackCoroutine.IsRunning)
+                {
+                    instance.Stop(audioPlayerToStop);
+                }                                
+            }
             return true;
 
         }
