@@ -1,19 +1,16 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Exiled.API.Features;
-using Exiled.API.Interfaces;
-using Exiled.Events.Handlers;
-using Exiled.Events.EventArgs;
+﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs.Map;
+using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Server;
-using SCPSLAudioApi.AudioCore;
-using UnityEngine;
+using LiteDB;
 using MEC;
 using Mirror;
-using Exiled.Events.EventArgs.Map;
+using SCPSLAudioApi.AudioCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
 
 namespace AudioPlayer
 {
@@ -23,11 +20,11 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(1, 3, 0);
+        public override Version Version => new Version(2, 0, 0);
 
         public override string Prefix => "audioplayer";
 
-        public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();        
+        public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();
 
         public static Plugin instance;
 
@@ -40,9 +37,10 @@ namespace AudioPlayer
             Plugin.instance = this;
             MutedAnnounce = new List<string>();
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
-            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;            
+            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
+            Exiled.Events.Handlers.Player.Verified += OnVerified;
         }
 
         public override void OnDisabled()
@@ -54,26 +52,48 @@ namespace AudioPlayer
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStart;
+            Exiled.Events.Handlers.Player.Verified -= OnVerified;
         }
 
         private void OnRoundStart()
         {
-            AudioPlayers.Clear();               
+            AudioPlayers.Clear();
+        }
+
+        private void OnVerified(VerifiedEventArgs ev)
+        {
+
+            using (var playerRepo = new PlayerRepository(Config.DatabaseFilePath))
+            {
+                PlayerDB playerdb = playerRepo.GetPlayerByUserId(ev.Player.UserId);
+                if (playerdb != null)
+                {
+                    if (playerdb.Mute == 2 && !MutedAnnounce.Contains(ev.Player.UserId))
+                    {
+                        MutedAnnounce.Add(ev.Player.UserId);
+                    }
+                }
+                else
+                {                    
+                    playerRepo.InsertPlayer(new PlayerDB() { UserId = ev.Player.UserId, Mute = 1 });
+                }                
+            }
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
         {
-            if(Config.PlayMtfSound)
+            if (Config.PlayMtfSound)
                 obj.IsAllowed = false;
         }
 
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
         {
             Stop(playerBase);
-                       
+
         }
 
-        public void Stop(AudioPlayerBase playerBase){            
+        public void Stop(AudioPlayerBase playerBase)
+        {
             var player = playerBase.Owner;
             Log.Debug("Track Finished");
             if (playerBase.CurrentPlay != null)
@@ -82,15 +102,15 @@ namespace AudioPlayer
                 playerBase.OnDestroy();
             }
 
-            if(player.gameObject != null)
+            if (player.gameObject != null)
             {
                 player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
                 Timing.CallDelayed(0.5f, () =>
                 {
                     NetworkServer.Destroy(player.gameObject);
                 });
-            }            
-            
+            }
+
             //NetworkConnectionToClient conn = player.connectionToClient;
             //player.OnDestroy();
             //CustomNetworkManager.TypedSingleton.OnServerDisconnect(conn);
@@ -100,16 +120,16 @@ namespace AudioPlayer
             {
                 AudioPlayers.Remove(hub);
             }
-            
-            foreach(var pla in AudioPlayers)
+
+            foreach (var pla in AudioPlayers)
             {
                 var audioplayer = AudioPlayerBase.Get(pla);
-                if(audioplayer.CurrentPlay == null)
+                if (audioplayer.CurrentPlay == null)
                 {
-                    AudioPlayers.Remove(pla);                    
-                }                
+                    AudioPlayers.Remove(pla);
+                }
             }
-        }        
+        }
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
@@ -123,22 +143,22 @@ namespace AudioPlayer
             else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency && Config.PlayChaosSound)
             {
                 Log.Debug("Chaos");
-                
+
                 PlaySound(Config.ChaosSoundFilePath, "Facility Announcement", 998, false);
             }
         }
 
         public bool PlaySound(string soundName, string botName, int id, bool url)
         {
-            Log.Debug("playsound "+ id);
+            Log.Debug("playsound " + id);
             foreach (var player in AudioPlayers)
             {
                 Log.Debug("audioplayers: " + AudioPlayers.Count);
                 if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName) && AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
                     return false;
-            }           
+            }
 
-            string fullPath =  url ? soundName : Path.Combine(Config.AudioFilePath, soundName);
+            string fullPath = url ? soundName : Path.Combine(Config.AudioFilePath, soundName);
             if (!File.Exists(fullPath) && !url)
             {
                 return false;
@@ -146,7 +166,7 @@ namespace AudioPlayer
             var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
             Exiled.API.Features.Components.FakeConnection fakeConnection = new Exiled.API.Features.Components.FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
-            NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);            
+            NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
 
             hubPlayer.nicknameSync.Network_myNickSync = botName;
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
@@ -173,7 +193,7 @@ namespace AudioPlayer
                 if (!audioPlayerToStop.PlaybackCoroutine.IsRunning)
                 {
                     instance.Stop(audioPlayerToStop);
-                }                                
+                }
             }
             return true;
 

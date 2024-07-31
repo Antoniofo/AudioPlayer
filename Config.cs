@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Exiled.API.Interfaces;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Exiled.API.Interfaces;
+using System.IO;
 
 namespace AudioPlayer
 {
@@ -13,17 +9,19 @@ namespace AudioPlayer
         public bool IsEnabled { get; set; } = true;
         public bool Debug { get; set; } = false;
 
-        public string AudioFilePath { get; set; } = "/home/container/.config/EXILED/Configs/audio";
+        public string AudioFilePath { get; set; } = Path.Combine(Exiled.API.Features.Paths.Configs, "audio");
 
-        public bool PlayMtfSound { get; set; } = true;
+        public bool PlayMtfSound { get; set; } = false;
 
         public string MtfSoundFilePath {get; set;} = "mtf.ogg";
 
-        public bool PlayChaosSound { get; set; } = true;
+        public bool PlayChaosSound { get; set; } = false;
 
         public string ChaosSoundFilePath {get; set;} = "chaos.ogg";
 
         [Description("Do not put over 100 because it could break the VoiceChat for everyplayer and they'll have to restart SL")]
         public float Volume {get; set;} = 20f;
+
+        public string DatabaseFilePath { get; set; } = Path.Combine(Exiled.API.Features.Paths.Configs, "audio/audioplayers.db");
     }
 }

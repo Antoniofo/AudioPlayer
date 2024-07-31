@@ -1,4 +1,4 @@
-﻿﻿using CommandSystem;
+﻿using CommandSystem;
 using Exiled.API.Features;
 using System;
 
@@ -28,16 +28,35 @@ namespace AudioPlayer
                 return false;
             }
             string plyID = ply.UserId;
-            if (Plugin.instance.MutedAnnounce.Contains(plyID))
+            using (var playerRepo = new PlayerRepository(Plugin.instance.Config.DatabaseFilePath))
             {
-                Plugin.instance.MutedAnnounce.Remove(plyID);     
+                PlayerDB playerdb = playerRepo.GetPlayerByUserId(plyID);                
+                if (playerdb != null)
+                {                    
+                    if (playerdb.Mute == 2)
+                    {
+                        Log.Info(playerdb.Mute);
+                        playerdb.Mute = 1;
+                        playerRepo.UpdatePlayer(playerdb);
+                        Plugin.instance.MutedAnnounce.Remove(plyID);
+
+                    }
+                    else
+                    {
+                        playerdb.Mute = 2;
+                        playerRepo.UpdatePlayer(playerdb);
+                        Plugin.instance.MutedAnnounce.Add(plyID);
+                    }
+                }
+                else
+                {                    
+                    playerRepo.InsertPlayer(new PlayerDB() { UserId = plyID, Mute = 2 });
+                    Plugin.instance.MutedAnnounce.Add(plyID);
+                }
+                playerdb = playerRepo.GetPlayerByUserId(plyID);                
+                response = playerdb.Mute == 2 ? "You have muted the Facility Announce" : "You have unmuted the Facility Announce";
                 
             }
-            else
-            {
-                Plugin.instance.MutedAnnounce.Add(plyID);                
-            }
-            response = Plugin.instance.MutedAnnounce.Contains(plyID) ? "You have muted the Facility Announce": "You have unmuted the Facility Announce";
             return true;
         }
     }
