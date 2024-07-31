@@ -22,6 +22,8 @@ namespace AudioPlayer
 
         public override Version Version => new Version(2, 0, 0);
 
+        public override Version RequiredExiledVersion => new Version(8, 11, 0);
+
         public override string Prefix => "audioplayer";
 
         public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();
@@ -31,8 +33,7 @@ namespace AudioPlayer
         public List<string> MutedAnnounce;
 
         public override void OnEnabled()
-        {
-            base.OnEnabled();
+        {            
             SCPSLAudioApi.Startup.SetupDependencies();
             Plugin.instance = this;
             MutedAnnounce = new List<string>();
@@ -41,11 +42,11 @@ namespace AudioPlayer
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
             Exiled.Events.Handlers.Player.Verified += OnVerified;
+            base.OnEnabled();
         }
 
         public override void OnDisabled()
-        {
-            base.OnDisabled();
+        {            
             Plugin.instance = null;
             MutedAnnounce = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
@@ -53,6 +54,7 @@ namespace AudioPlayer
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStart;
             Exiled.Events.Handlers.Player.Verified -= OnVerified;
+            base.OnDisabled();
         }
 
         private void OnRoundStart()
@@ -74,9 +76,9 @@ namespace AudioPlayer
                     }
                 }
                 else
-                {                    
+                {
                     playerRepo.InsertPlayer(new PlayerDB() { UserId = ev.Player.UserId, Mute = 1 });
-                }                
+                }
             }
         }
 
