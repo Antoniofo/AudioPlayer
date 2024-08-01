@@ -34,8 +34,7 @@ namespace AudioPlayer
                 if (playerdb != null)
                 {                    
                     if (playerdb.Mute == 2)
-                    {
-                        Log.Info(playerdb.Mute);
+                    {                        
                         playerdb.Mute = 1;
                         playerRepo.UpdatePlayer(playerdb);
                         Plugin.instance.MutedAnnounce.Remove(plyID);
