@@ -3,6 +3,7 @@
 [Link]: https://github.com/Antoniofo/AudioPlayer/releases
 <!---------------------------------[ Buttons ]--------------------------------->
 [Release]: https://img.shields.io/badge/Release-EFFDE?style=for-the-badge&logoColor=white&logo=DocuSign
+![GitHub all releases](https://img.shields.io/github/downloads/Antoniofo/AudioPlayer/total)
 
 
 # Installation:
@@ -34,3 +35,6 @@ Note: the audio files need to meet the requirement for the SCPSLAudioApi:
 The permission you can give in the permission file:
 
 `- AudioPlayer`
+
+# Stats
+![Alt](https://repobeats.axiom.co/api/embed/b7e2b9be38f9202b150d87f243dd9aaff51407e9.svg "Repobeats analytics image")
