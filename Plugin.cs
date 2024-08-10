@@ -20,7 +20,7 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 0, 0);
+        public override Version Version => new Version(2, 0, 1);
 
         public override Version RequiredExiledVersion => new Version(8, 11, 0);
 
@@ -152,10 +152,8 @@ namespace AudioPlayer
 
         public bool PlaySound(string soundName, string botName, int id, bool url)
         {
-            Log.Debug("playsound " + id);
             foreach (var player in AudioPlayers)
-            {
-                Log.Debug("audioplayers: " + AudioPlayers.Count);
+            {                
                 if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName) && AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
                     return false;
             }
@@ -180,11 +178,7 @@ namespace AudioPlayer
             {
                 audioPlayer.BroadcastTo.Add(player.Id);
             }
-            audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);
-            foreach (var pl in audioPlayer.BroadcastTo)
-            {
-                Log.Debug(pl);
-            }
+            audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);            
             audioPlayer.Play(0);
 
             //Cleanup audioplayer that crashes cause i didn't find a way to use the audioapi to error handle that
