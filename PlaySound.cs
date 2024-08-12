@@ -28,7 +28,7 @@ namespace AudioPlayer
         };
 
         public override void LoadGeneratedCommands()
-        {            
+        {
         }
 
         protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
@@ -40,7 +40,7 @@ namespace AudioPlayer
             }
             if (arguments.Count <= 0)
             {
-                response = "No arguments given\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
+                response = "No arguments given\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
                 return false;
             }
 
@@ -58,25 +58,28 @@ namespace AudioPlayer
                 case "play":
                     if (arguments.Count < 3)
                     {
-                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
+                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
                         return false;
                     }
 
                     string sound = Path.Combine(Plugin.instance.Config.AudioFilePath, arguments.At(1));
                     string displayName = arguments.At(2);
-                                        
+
                     bool ret = Plugin.instance.PlaySound(sound, displayName, 99, false);
-                    if (ret){
+                    if (ret)
+                    {
                         response = "Playing ...";
                         return true;
-                    }else{
+                    }
+                    else
+                    {
                         response = "Last sound not finished or file doesn't exist";
                         return false;
                     }
                 case "playurl":
                     if (arguments.Count < 3)
                     {
-                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
+                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
                         return false;
                     }
                     string urlsound = arguments.At(1);
@@ -92,17 +95,40 @@ namespace AudioPlayer
                         response = "Last sound not finished or file doesn't exist";
                         return false;
                     }
-                case "stop":                    
-                    List<ReferenceHub> listofshit = Plugin.AudioPlayers.Where(x => !x.nicknameSync.Network_myNickSync.Equals("Facility Announcement")).ToList();                    
+                case "stop":
+                    List<ReferenceHub> listofshit;
+
+                    bool excludeFacilityAnnouncement = true;
+
+                    if (arguments.Count >= 2)
+                    {
+                        if (bool.TryParse(arguments.At(1), out bool includeAllPlayers))
+                        {
+                            excludeFacilityAnnouncement = !includeAllPlayers;
+                        }
+                    }
+
+                    if (excludeFacilityAnnouncement)
+                    {
+                        listofshit = Plugin.AudioPlayers
+                            .Where(player => !player.nicknameSync.Network_myNickSync.Equals("Facility Announcement"))
+                            .ToList();
+                    }
+                    else
+                    {
+                        listofshit = Plugin.AudioPlayers.ToList();
+                    }
+
+
                     for (int i = 0; i < listofshit.Count; i++)
                     {
                         var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
                         Plugin.instance.Stop(audioPlayer);
-                    }                    
+                    }
                     response = "Sounds Stoped";
                     return true;
                 default:
-                    response = "No subcommand recognized\nUsage: audio|audioplayer play/playurl/list/stop [filename] [displayName]";
+                    response = "No subcommand recognized\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
                     return false;
 
             }

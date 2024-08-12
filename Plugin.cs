@@ -22,7 +22,7 @@ namespace AudioPlayer
 
         public override Version Version => new Version(2, 0, 1);
 
-        public override Version RequiredExiledVersion => new Version(8, 11, 0);
+        public override Version RequiredExiledVersion => new Version(8, 9, 11);
 
         public override string Prefix => "audioplayer";
 
@@ -190,7 +190,7 @@ namespace AudioPlayer
                 {
                     instance.Stop(audioPlayerToStop);
                 }
-            }
+            }            
             return true;
 
         }
