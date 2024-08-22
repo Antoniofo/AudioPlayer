@@ -41,11 +41,7 @@ namespace AudioPlayer
             }
             if (arguments.Count <= 0)
             {
-<<<<<<< HEAD
-                response = "No arguments given\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
-=======
                 response = $"No arguments given\n{ReturnUsages()}";
->>>>>>> main
                 return false;
             }
 
@@ -67,42 +63,18 @@ namespace AudioPlayer
                 case "play":
                     if (arguments.Count < 3)
                     {
-<<<<<<< HEAD
-                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
-=======
                         response = $"Not enough argument to play a sound\n{ReturnPlayUsage()}";
->>>>>>> main
                         return false;
                     }
 
                     bool ret;
                     string displayName = arguments.At(2);
-<<<<<<< HEAD
-
-                    bool ret = Plugin.instance.PlaySound(sound, displayName, 99, false);
-                    if (ret)
-                    {
-                        response = "Playing ...";
-                        return true;
-                    }
-                    else
-                    {
-                        response = "Last sound not finished or file doesn't exist";
-                        return false;
-                    }
-                case "playurl":
-                    if (arguments.Count < 3)
-                    {
-                        response = "Not enough argument to play a sound\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
-                        return false;
-=======
                     string sound;
 
                     if (IsUrl(arguments.At(1)))
                     {
                         sound = arguments.At(1);
                         ret = API.SoundPlayer.PlaySound(sound, displayName, 98, true);
->>>>>>> main
                     }
                     else
                     {
@@ -141,16 +113,6 @@ namespace AudioPlayer
                     }
                     else
                     {
-<<<<<<< HEAD
-                        listofshit = Plugin.AudioPlayers.ToList();
-                    }
-
-
-                    for (int i = 0; i < listofshit.Count; i++)
-                    {
-                        var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
-                        Plugin.instance.Stop(audioPlayer);
-=======
                         listofshit = API.SoundPlayer.AudioPlayers.ToList();
                     }
 
@@ -158,7 +120,6 @@ namespace AudioPlayer
                     {
                         var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
                         API.SoundPlayer.Stop(audioPlayer);
->>>>>>> main
                     }
                     response = "Sounds Stoped";
                     return true;
@@ -204,11 +165,7 @@ namespace AudioPlayer
                         return false;
                     }
                 default:
-<<<<<<< HEAD
-                    response = "No subcommand recognized\nUsage: audio|audioplayer play/playurl/list/stop [[filename]|[true/false]] [displayName]";
-=======
                     response = $"No subcommand recognized\n{ReturnUsages()}";
->>>>>>> main
                     return false;
 
             }
