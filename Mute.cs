@@ -37,20 +37,20 @@ namespace AudioPlayer
                     {                        
                         playerdb.Mute = 1;
                         playerRepo.UpdatePlayer(playerdb);
-                        Plugin.instance.MutedAnnounce.Remove(plyID);
+                        API.SoundPlayer.MutedAnnounce.Remove(plyID);
 
                     }
                     else
                     {
                         playerdb.Mute = 2;
                         playerRepo.UpdatePlayer(playerdb);
-                        Plugin.instance.MutedAnnounce.Add(plyID);
+                        API.SoundPlayer.MutedAnnounce.Add(plyID);
                     }
                 }
                 else
                 {                    
                     playerRepo.InsertPlayer(new PlayerDB() { UserId = plyID, Mute = 2 });
-                    Plugin.instance.MutedAnnounce.Add(plyID);
+                    API.SoundPlayer.MutedAnnounce.Add(plyID);
                 }
                 playerdb = playerRepo.GetPlayerByUserId(plyID);                
                 response = playerdb.Mute == 2 ? "You have muted the Facility Announce" : "You have unmuted the Facility Announce";

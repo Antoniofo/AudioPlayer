@@ -20,9 +20,31 @@ Optional: You will need some audio files in the `audio` folder inside the Exiled
 
 Open your Remote Admin Console and write:
 
-``audio`` 
+To play a sound: 
 
-Usage: audio|audioplayer play/playurl/list/stop [filename]/[URL] [displayName]
+``audio play file.ogg DisplayName``
+
+To list audio files available:
+
+``audio list``
+
+To stop audio:
+
+``audio stop 1``
+
+To play audio from URL:
+
+``audio play https://myawesomewebserver.net/files/audio.ogg DisplayName``
+
+To play audio at certain coordinate:
+
+``audio atplace <X> <Y> <Z> <duration> file.ogg DisplayName``
+
+``audio atplace 19 200 20 3 file.ogg DisplayName``
+
+Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]] [displayName]
+
+With the `play` and `atplace` you can use either a file from the server filesystem or an URL.
 
 Note: the audio files need to meet the requirement for the SCPSLAudioApi:
 - .ogg format
