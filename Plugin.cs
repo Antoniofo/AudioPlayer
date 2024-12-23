@@ -14,9 +14,9 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 1, 0);
+        public override Version Version => new Version(2, 2, 0);
 
-        public override Version RequiredExiledVersion => new Version(8, 11, 0);
+        public override Version RequiredExiledVersion => new Version(9, 0, 1);
 
         public override string Prefix => "audioplayer";
 
@@ -90,12 +90,12 @@ namespace AudioPlayer
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {            
-            if (ev.NextKnownTeam == Respawning.SpawnableTeamType.NineTailedFox && Config.PlayMtfSound)
+            if (ev.Wave.Faction == PlayerRoles.Faction.FoundationStaff && Config.PlayMtfSound)
             {                
 
                 API.SoundPlayer.PlaySound(Config.MtfSoundFilePath, "Facility Announcement", 998, false);
             }
-            else if (ev.NextKnownTeam == Respawning.SpawnableTeamType.ChaosInsurgency && Config.PlayChaosSound)
+            else if (ev.Wave.Faction == PlayerRoles.Faction.FoundationEnemy && Config.PlayChaosSound)
             {                
 
                 API.SoundPlayer.PlaySound(Config.ChaosSoundFilePath, "Facility Announcement", 998, false);
