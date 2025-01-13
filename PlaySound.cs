@@ -48,7 +48,7 @@ namespace AudioPlayer
             switch (arguments.At(0))
             {
                 case "list":
-                    string[] files = Directory.GetFiles(Plugin.instance.Config.AudioFilePath);
+                    string[] files = Directory.GetFiles(Plugin.Instance.Config.AudioFilePath);
                     string listSound = "Here are the current available sounds : \n";
                     foreach (string file in files)
                     {
@@ -78,7 +78,7 @@ namespace AudioPlayer
                     }
                     else
                     {
-                        sound = Path.Combine(Plugin.instance.Config.AudioFilePath, arguments.At(1));
+                        sound = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(1));
                         ret = API.SoundPlayer.PlaySound(sound, displayName, 99, false);
                     }
 
@@ -150,7 +150,7 @@ namespace AudioPlayer
                     }
                     else
                     {
-                        soundPlace = Path.Combine(Plugin.instance.Config.AudioFilePath, arguments.At(5));
+                        soundPlace = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(5));
                         retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance, displayNametest, 96, false); ;
                     }
 

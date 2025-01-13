@@ -6,6 +6,7 @@ using SCPSLAudioApi.AudioCore;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Exiled.API.Features.Core.UserSettings;
 using UnityEngine;
 
 namespace AudioPlayer.API
@@ -57,7 +58,7 @@ namespace AudioPlayer.API
                     return false;
             }
 
-            string fullPath = url ? soundName : Path.Combine(Plugin.instance.Config.AudioFilePath, soundName);
+            string fullPath = url ? soundName : Path.Combine(Plugin.Instance.Config.AudioFilePath, soundName);
             if (!File.Exists(fullPath) && !url)
             {
                 return false;
@@ -71,11 +72,14 @@ namespace AudioPlayer.API
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
-            audioPlayer.Volume = Plugin.instance.Config.Volume;
+            audioPlayer.Volume = Plugin.Instance.Config.Volume;
             audioPlayer.AllowUrl = url;
+            
             foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.UserId)))
             {
-                audioPlayer.BroadcastTo.Add(player.Id);
+                SettingBase.TryGetSetting(player, Plugin.Instance.Config.SettingId, out SettingBase settings);
+                //settings.Base.
+                //todo
             }
             audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);
             audioPlayer.Play(0);
@@ -102,7 +106,7 @@ namespace AudioPlayer.API
                     return false;
             }
 
-            string fullPath = url ? soundName : Path.Combine(Plugin.instance.Config.AudioFilePath, soundName);
+            string fullPath = url ? soundName : Path.Combine(Plugin.Instance.Config.AudioFilePath, soundName);
             if (!File.Exists(fullPath) && !url)
             {
                 return false;
@@ -117,7 +121,7 @@ namespace AudioPlayer.API
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
-            audioPlayer.Volume = Plugin.instance.Config.Volume;
+            audioPlayer.Volume = Plugin.Instance.Config.Volume;
             audioPlayer.AllowUrl = url;
 
             foreach (Player player in Player.List)

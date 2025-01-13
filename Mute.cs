@@ -28,7 +28,7 @@ namespace AudioPlayer
                 return false;
             }
             string plyID = ply.UserId;
-            using (var playerRepo = new PlayerRepository(Plugin.instance.Config.DatabaseFilePath))
+            using (var playerRepo = new PlayerRepository(Plugin.Instance.Config.DatabaseFilePath))
             {
                 PlayerDB playerdb = playerRepo.GetPlayerByUserId(plyID);                
                 if (playerdb != null)
