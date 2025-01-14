@@ -1,5 +1,4 @@
 ﻿using Exiled.API.Features;
-using LiteDB;
 using MEC;
 using Mirror;
 using SCPSLAudioApi.AudioCore;
@@ -83,7 +82,7 @@ namespace AudioPlayer.API
                 SSTwoButtonsSetting setting =
                     ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(player.ReferenceHub,
                         Plugin.Instance.Config.SettingId);
-                if (setting.SyncIsA)
+                if (setting.SyncIsB)
                 {
                     audioPlayer.BroadcastTo.Add(player.Id);
                 }

@@ -5,21 +5,20 @@ using Exiled.Events.EventArgs.Server;
 using SCPSLAudioApi.AudioCore;
 using System;
 using System.Collections.Generic;
-using System.Net.Configuration;
 using Exiled.API.Features.Core.UserSettings;
 using UserSettings.ServerSpecific;
 
 namespace AudioPlayer
 {
-    public class Plugin : Plugin<Config>
+    public class Plugin : Plugin<Config, Translation>
     {
         public override string Author => "Antoniofo";
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 2, 0);
+        public override Version Version => new Version(2, 3, 0);
 
-        public override Version RequiredExiledVersion => new Version(9, 0, 1);
+        public override Version RequiredExiledVersion => new Version(9, 3, 0);
 
         public override string Prefix => "audioplayer";
 
@@ -30,17 +29,16 @@ namespace AudioPlayer
         public override void OnEnabled()
         {
             SCPSLAudioApi.Startup.SetupDependencies();
-            Plugin.Instance = this;
-            //API.SoundPlayer.MutedAnnounce = new List<string>();
+            Instance = this;
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
-            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
+            AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
             Exiled.Events.Handlers.Player.Verified += OnVerified;
             IEnumerable<SettingBase> settings = new List<SettingBase>()
             {
-                new TwoButtonsSetting(Config.SettingId, "Mute Facility announcement", "Mute", "Unmute", true,
-                    "This will make all the announcement of wave muted", new HeaderSetting("AudioPlayer"))
+                new TwoButtonsSetting(Config.SettingId, Translation.SettingLabel, Translation.SettingA, Translation.SettingB, true,
+                    Translation.HintDescription, new HeaderSetting("AudioPlayer"))
             };
             SettingBase.Register(settings);
             SettingBase.SendToAll();
@@ -49,10 +47,9 @@ namespace AudioPlayer
 
         public override void OnDisabled()
         {
-            Plugin.Instance = null;
-            //API.SoundPlayer.MutedAnnounce = null;
+            Instance = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
-            SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
+            AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStart;
             Exiled.Events.Handlers.Player.Verified -= OnVerified;
@@ -67,21 +64,6 @@ namespace AudioPlayer
         private void OnVerified(VerifiedEventArgs ev)
         {
             ServerSpecificSettingsSync.SendToPlayer(ev.Player.ReferenceHub);
-            /*using (var playerRepo = new PlayerRepository(Config.DatabaseFilePath))
-            {
-                PlayerDB playerdb = playerRepo.GetPlayerByUserId(ev.Player.UserId);
-                if (playerdb != null)
-                {
-                    if (playerdb.Mute == 2 && !API.SoundPlayer.MutedAnnounce.Contains(ev.Player.UserId))
-                    {
-                        API.SoundPlayer.MutedAnnounce.Add(ev.Player.UserId);
-                    }
-                }
-                else
-                {
-                    playerRepo.InsertPlayer(new PlayerDB() { UserId = ev.Player.UserId, Mute = 1 });
-                }
-            }*/
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
