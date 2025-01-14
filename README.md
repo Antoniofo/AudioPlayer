@@ -9,8 +9,6 @@
 
 You will need the [SCPSLAudioAPI.dll](https://github.com/CedModV2/SCPSLAudioApi/releases) along with this plugin to work. Place it in the same folder as the AudioPlayer.dll
 
-This plugin has some dependecies you will find a zip archive named dependencies.zip inside the [release](https://github.com/Antoniofo/AudioPlayer/releases) you will have to put those two files in the `dependencies` folder indide the `Plugins` folder
-
 You can install this plugin, download the [.dll](https://github.com/Antoniofo/AudioPlayer/releases) file and placing it in ``%AppData%\Roaming\EXILED\Plugins`` (Windows) or ``~/.config/EXILED/Plugins`` (Linux)
 
 Optional: You will need some audio files in the `audio` folder inside the Exiled `Config` folder named mtf.ogg and chaos.ogg for each respawn.

@@ -21,7 +21,7 @@ namespace AudioPlayer
 
         [Description("Do not put over 100 because it could break the VoiceChat for everyplayer and they'll have to restart SL")]
         public float Volume {get; set;} = 20f;
-
-        public string DatabaseFilePath { get; set; } = Path.Combine(Exiled.API.Features.Paths.Configs, "audio/audioplayers.db");
+        [Description("Change this if it collide with an other plugin")]
+        public int SettingId { get; set; } = 668;
     }
 }

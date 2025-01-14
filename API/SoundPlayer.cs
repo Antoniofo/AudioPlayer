@@ -1,19 +1,19 @@
 ﻿using Exiled.API.Features;
-using LiteDB;
 using MEC;
 using Mirror;
 using SCPSLAudioApi.AudioCore;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Exiled.API.Features.Core.UserSettings;
 using UnityEngine;
+using UserSettings.ServerSpecific;
 
 namespace AudioPlayer.API
 {
     public class SoundPlayer
     {
         public static List<ReferenceHub> AudioPlayers = new List<ReferenceHub>();
-        public static List<string> MutedAnnounce;
 
         public static void Stop(AudioPlayerBase playerBase)
         {
@@ -28,12 +28,9 @@ namespace AudioPlayer.API
             if (player.gameObject != null)
             {
                 player.gameObject.transform.position = new Vector3(-9999f, -9999f, -9999f);
-                Timing.CallDelayed(0.5f, () =>
-                {
-                    NetworkServer.Destroy(player.gameObject);
-                });
+                Timing.CallDelayed(0.5f, () => { NetworkServer.Destroy(player.gameObject); });
             }
-            
+
             var hub = AudioPlayers.Where(x => x.PlayerId == playerBase.Owner.PlayerId).FirstOrDefault();
             if (hub != null)
             {
@@ -49,21 +46,26 @@ namespace AudioPlayer.API
                 }
             }
         }
+
         public static bool PlaySound(string soundName, string botName, int id, bool url)
         {
             foreach (var player in AudioPlayers)
             {
-                if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName) && AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
+                if (AudioPlayers.Any(x =>
+                        x.nicknameSync.Network_myNickSync.Equals(botName) &&
+                        AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
                     return false;
             }
 
-            string fullPath = url ? soundName : Path.Combine(Plugin.instance.Config.AudioFilePath, soundName);
+            string fullPath = url ? soundName : Path.Combine(Plugin.Instance.Config.AudioFilePath, soundName);
             if (!File.Exists(fullPath) && !url)
             {
                 return false;
             }
+
             var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
-            Exiled.API.Features.Components.FakeConnection fakeConnection = new Exiled.API.Features.Components.FakeConnection(id);
+            Exiled.API.Features.Components.FakeConnection fakeConnection =
+                new Exiled.API.Features.Components.FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
             NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
 
@@ -71,12 +73,21 @@ namespace AudioPlayer.API
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
-            audioPlayer.Volume = Plugin.instance.Config.Volume;
+            audioPlayer.Volume = Plugin.Instance.Config.Volume;
             audioPlayer.AllowUrl = url;
-            foreach (Exiled.API.Features.Player player in Exiled.API.Features.Player.List.Where(x => !MutedAnnounce.Contains(x.UserId)))
+
+            foreach (Player player in Player.List)
             {
-                audioPlayer.BroadcastTo.Add(player.Id);
+                SettingBase.TryGetSetting(player, Plugin.Instance.Config.SettingId, out SettingBase settings);
+                SSTwoButtonsSetting setting =
+                    ServerSpecificSettingsSync.GetSettingOfUser<SSTwoButtonsSetting>(player.ReferenceHub,
+                        Plugin.Instance.Config.SettingId);
+                if (setting.SyncIsB)
+                {
+                    audioPlayer.BroadcastTo.Add(player.Id);
+                }
             }
+
             audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);
             audioPlayer.Play(0);
 
@@ -90,25 +101,30 @@ namespace AudioPlayer.API
                     Stop(audioPlayerToStop);
                 }
             }
-            return true;
 
+            return true;
         }
 
-        public static bool PlaySoundAtPlace(string soundName, Vector3 place, float distance, string botName, int id, bool url)
+        public static bool PlaySoundAtPlace(string soundName, Vector3 place, float distance, string botName, int id,
+            bool url)
         {
             foreach (var player in AudioPlayers)
             {
-                if (AudioPlayers.Any(x => x.nicknameSync.Network_myNickSync.Equals(botName) && AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
+                if (AudioPlayers.Any(x =>
+                        x.nicknameSync.Network_myNickSync.Equals(botName) &&
+                        AudioPlayerBase.Get(x).PlaybackCoroutine.IsRunning))
                     return false;
             }
 
-            string fullPath = url ? soundName : Path.Combine(Plugin.instance.Config.AudioFilePath, soundName);
+            string fullPath = url ? soundName : Path.Combine(Plugin.Instance.Config.AudioFilePath, soundName);
             if (!File.Exists(fullPath) && !url)
             {
                 return false;
             }
+
             var newPlayer = UnityEngine.Object.Instantiate(NetworkManager.singleton.playerPrefab);
-            Exiled.API.Features.Components.FakeConnection fakeConnection = new Exiled.API.Features.Components.FakeConnection(id);
+            Exiled.API.Features.Components.FakeConnection fakeConnection =
+                new Exiled.API.Features.Components.FakeConnection(id);
             var hubPlayer = newPlayer.GetComponent<ReferenceHub>();
             NetworkServer.AddPlayerForConnection(fakeConnection, newPlayer);
 
@@ -117,7 +133,7 @@ namespace AudioPlayer.API
             AudioPlayerBase audioPlayer = AudioPlayerBase.Get(hubPlayer);
             AudioPlayers.Add(hubPlayer);
             audioPlayer.Enqueue(fullPath, -1);
-            audioPlayer.Volume = Plugin.instance.Config.Volume;
+            audioPlayer.Volume = Plugin.Instance.Config.Volume;
             audioPlayer.AllowUrl = url;
 
             foreach (Player player in Player.List)
@@ -127,6 +143,7 @@ namespace AudioPlayer.API
                     audioPlayer.BroadcastTo.Add(player.Id);
                 }
             }
+
             audioPlayer.BroadcastTo.Add(hubPlayer.PlayerId);
             audioPlayer.Play(0);
 
@@ -140,8 +157,8 @@ namespace AudioPlayer.API
                     Stop(audioPlayerToStop);
                 }
             }
-            return true;
 
+            return true;
         }
     }
 }
