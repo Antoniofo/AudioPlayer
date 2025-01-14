@@ -31,7 +31,7 @@ namespace AudioPlayer
         {
             SCPSLAudioApi.Startup.SetupDependencies();
             Plugin.Instance = this;
-            API.SoundPlayer.MutedAnnounce = new List<string>();
+            //API.SoundPlayer.MutedAnnounce = new List<string>();
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
@@ -50,7 +50,7 @@ namespace AudioPlayer
         public override void OnDisabled()
         {
             Plugin.Instance = null;
-            API.SoundPlayer.MutedAnnounce = null;
+            //API.SoundPlayer.MutedAnnounce = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
             SCPSLAudioApi.AudioCore.AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
@@ -67,7 +67,7 @@ namespace AudioPlayer
         private void OnVerified(VerifiedEventArgs ev)
         {
             ServerSpecificSettingsSync.SendToPlayer(ev.Player.ReferenceHub);
-            using (var playerRepo = new PlayerRepository(Config.DatabaseFilePath))
+            /*using (var playerRepo = new PlayerRepository(Config.DatabaseFilePath))
             {
                 PlayerDB playerdb = playerRepo.GetPlayerByUserId(ev.Player.UserId);
                 if (playerdb != null)
@@ -81,7 +81,7 @@ namespace AudioPlayer
                 {
                     playerRepo.InsertPlayer(new PlayerDB() { UserId = ev.Player.UserId, Mute = 1 });
                 }
-            }
+            }*/
         }
 
         private void OnNTFAnnounce(AnnouncingNtfEntranceEventArgs obj)
