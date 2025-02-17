@@ -16,7 +16,7 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 3, 0);
+        public override Version Version => new Version(2, 3, 1);
 
         public override Version RequiredExiledVersion => new Version(9, 3, 0);
 
@@ -33,6 +33,7 @@ namespace AudioPlayer
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
+            Exiled.Events.Handlers.Map.AnnouncingChaosEntrance += OnChaosAnnounce;
             Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
             Exiled.Events.Handlers.Player.Verified += OnVerified;
             IEnumerable<SettingBase> settings = new List<SettingBase>()
@@ -70,6 +71,14 @@ namespace AudioPlayer
         {
             if (Config.PlayMtfSound)
                 obj.IsAllowed = false;
+        }
+
+        private void OnChaosAnnounce(AnnouncingChaosEntranceEventArgs obj)
+        {
+            if (Config.PlayChaosSound)
+            {
+                obj.IsAllowed = false;
+            }
         }
 
         private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
