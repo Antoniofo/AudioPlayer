@@ -11,7 +11,6 @@ namespace AudioPlayer
 
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
-
     public class PlaySound : ParentCommand, IUsageProvider
     {
         public PlaySound() => LoadGeneratedCommands();
@@ -32,13 +31,15 @@ namespace AudioPlayer
         {
         }
 
-        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        protected override bool ExecuteParent(ArraySegment<string> arguments, ICommandSender sender,
+            out string response)
         {
             if (!sender.CheckPermission("AudioPlayer"))
             {
                 response = "You don't have the permission";
                 return false;
             }
+
             if (arguments.Count <= 0)
             {
                 response = $"No arguments given\n{ReturnUsages()}";
@@ -53,11 +54,12 @@ namespace AudioPlayer
                     foreach (string file in files)
                     {
                         string path = Path.GetFileName(file);
-                        if (path.EndsWith(".ogg")) {
+                        if (path.EndsWith(".ogg"))
+                        {
                             listSound += "- " + path + "\n";
                         }
-                        
                     }
+
                     response = listSound;
                     return true;
                 case "play":
@@ -68,7 +70,12 @@ namespace AudioPlayer
                     }
 
                     bool ret;
-                    string displayName = arguments.At(2);
+                    string displayName = "";
+                    for (int i = 2; i < arguments.Count; i++)
+                    {
+                        displayName += $"{arguments.At(i)} ";
+                    }
+
                     string sound;
 
                     if (IsUrl(arguments.At(1)))
@@ -121,6 +128,7 @@ namespace AudioPlayer
                         var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
                         API.SoundPlayer.Stop(audioPlayer);
                     }
+
                     response = "Sounds Stoped";
                     return true;
 
@@ -130,6 +138,7 @@ namespace AudioPlayer
                         response = $"Not enough argument to play a sound\n{ReturnPlaceUsage()}";
                         return false;
                     }
+
                     response = "Failed to parse numbers for position";
                     if (!int.TryParse(arguments.At(1), out int CoorX))
                         return false;
@@ -141,17 +150,25 @@ namespace AudioPlayer
                         return false;
 
                     string soundPlace;
-                    string displayNametest = arguments.At(6);
+                    string displayNametest = "";
+                    for (int i = 6; i < arguments.Count; i++)
+                    {
+                        displayNametest += $"{arguments.At(i)} ";
+                    }
+
                     bool retPlace;
                     if (IsUrl(arguments.At(1)))
                     {
                         soundPlace = arguments.At(5);
-                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance, displayNametest, 97, true);
+                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
+                            displayNametest, 97, true);
                     }
                     else
                     {
                         soundPlace = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(5));
-                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance, displayNametest, 96, false); ;
+                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
+                            displayNametest, 96, false);
+                        ;
                     }
 
                     if (retPlace)
@@ -167,9 +184,7 @@ namespace AudioPlayer
                 default:
                     response = $"No subcommand recognized\n{ReturnUsages()}";
                     return false;
-
             }
-
         }
 
         public static bool IsUrl(string input)
@@ -181,7 +196,8 @@ namespace AudioPlayer
 
         public static string ReturnUsages()
         {
-            return "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]] [displayName]";
+            return
+                "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]] [displayName]";
         }
 
         public static string ReturnPlaceUsage()
