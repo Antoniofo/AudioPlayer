@@ -7,7 +7,7 @@
     <ProjectGuid>{578C1386-AF0A-4783-B498-8EDF35AE8669}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioPlayer</RootNamespace>
+    <RootNamespace>AudioPlayerManager</RootNamespace>
     <AssemblyName>AudioPlayer</AssemblyName>
 	<LangVersion>10</LangVersion>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -85,12 +85,18 @@
     </Reference>
     <Reference Include="NorthwoodLib, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\ExMod.Exiled.9.6.0-beta8\lib\net48\NorthwoodLib.dll</HintPath>
-    </Reference>
-    <Reference Include="SCPSLAudioApi, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    </Reference>    
+    <Reference Include="AudioPlayerApi, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\lib\SCPSLAudioApi.dll</HintPath>
+      <HintPath>.\lib\AudioPlayerApi.dll</HintPath>
+    </Reference>    
+    <Reference Include="NVorbis">
+      <HintPath>C:\Users\Admin\AppData\Roaming\EXILED_beta\Plugins\dependencies\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Memory">
+      <HintPath>C:\Users\Admin\AppData\Roaming\EXILED_beta\Plugins\dependencies\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="Unity.TextMeshPro">
       <HintPath>$(EXILED_REFERENCES_BETA)\Unity.TextMeshPro.dll</HintPath>
@@ -106,6 +112,9 @@
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(EXILED_REFERENCES_BETA)\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>C:\Users\Admin\Desktop\Game_Servers\SCPSL_Server_early_build\SCPSL_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
       <HintPath>packages\ExMod.Exiled.9.6.0-beta8\lib\net48\YamlDotNet.dll</HintPath>
