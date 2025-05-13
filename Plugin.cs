@@ -16,9 +16,9 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 3, 2);
+        public override Version Version => new Version(2, 4, 0);
 
-        public override Version RequiredExiledVersion => new Version(9, 5, 0);
+        public override Version RequiredExiledVersion => new Version(9, 6, 0);
 
         public override string Prefix => "audioplayer";
 
