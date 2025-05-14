@@ -1,11 +1,8 @@
 ﻿using CommandSystem;
 using Exiled.Permissions.Extensions;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using Exiled.API.Features;
 
 namespace AudioPlayerManager
 
@@ -69,20 +66,9 @@ namespace AudioPlayerManager
                         return false;
                     }
 
-                    string sound;
+                    string sound = arguments.At(1);
+                    API.SoundPlayer.PlayGlobalAudio(sound, IsUrl(arguments.At(1)));
 
-                    if (IsUrl(arguments.At(1)))
-                    {
-                        Log.Debug("URL Sound");
-                        sound = arguments.At(1);
-                        API.SoundPlayer.PlayGlobalAudio(sound, true);
-                    }
-                    else
-                    {
-                        Log.Debug("normal Sound");
-                        sound = arguments.At(1);
-                        API.SoundPlayer.PlayGlobalAudio(sound, false);
-                    }
 
                     response = "Playing ...";
                     return true;
@@ -94,7 +80,7 @@ namespace AudioPlayerManager
                         return true;
                     }
 
-                    aplayer.Destroy();
+                    aplayer.RemoveAllClips();
                     /*List<ReferenceHub> listofshit;
 
                     bool excludeFacilityAnnouncement = true;
@@ -124,59 +110,34 @@ namespace AudioPlayerManager
                         //API.SoundPlayer.Stop(audioPlayer);
                     }*/
 
-                    response = "Maybe";
+                    response = "Audio stopped";
                     return true;
 
                 case "atplace":
-                /*
-                if (arguments.Count < 7)
-                {
-                    response = $"Not enough argument to play a sound\n{ReturnPlaceUsage()}";
-                    return false;
-                }
 
-                response = "Failed to parse numbers for position";
-                if (!int.TryParse(arguments.At(1), out int CoorX))
-                    return false;
-                if (!int.TryParse(arguments.At(2), out int CoorY))
-                    return false;
-                if (!int.TryParse(arguments.At(3), out int CoorZ))
-                    return false;
-                if (!int.TryParse(arguments.At(4), out int Distance))
-                    return false;
+                    if (arguments.Count < 6)
+                    {
+                        response = $"Not enough argument to play a sound\n{ReturnPlaceUsage()}";
+                        return false;
+                    }
 
-                string soundPlace;
-                string displayNametest = "";
-                for (int i = 6; i < arguments.Count; i++)
-                {
-                    displayNametest += $"{arguments.At(i)} ";
-                }
+                    response = "Failed to parse numbers for position";
+                    if (!int.TryParse(arguments.At(1), out int coorX))
+                        return false;
+                    if (!int.TryParse(arguments.At(2), out int coorY))
+                        return false;
+                    if (!int.TryParse(arguments.At(3), out int coorZ))
+                        return false;
+                    if (!int.TryParse(arguments.At(4), out int distance))
+                        return false;
 
-                bool retPlace;
-                if (IsUrl(arguments.At(1)))
-                {
-                    soundPlace = arguments.At(5);
-                    retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
-                        displayNametest, 97, true);
-                }
-                else
-                {
-                    soundPlace = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(5));
-                    retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
-                        displayNametest, 96, false);
-                    ;
-                }
+                    string soundPlace = arguments.At(5);
+                    API.SoundPlayer.PlayLocalAudio(soundPlace, IsUrl(arguments.At(1)), new(coorX, coorY, coorZ),
+                        distance);
 
-                if (retPlace)
-                {
-                    response = $"Playing at {CoorX} {CoorY} {CoorZ} with range of {Distance}...";
+                    response = $"Playing at {coorX} {coorY} {coorZ} with range of {distance}...";
                     return true;
-                }
-                else
-                {
-                    response = "Last sound not finished or file doesn't exist";
-                    return false;
-                }*/
+
                 default:
                     response = $"No subcommand recognized\n{ReturnUsages()}";
                     return false;
@@ -193,17 +154,17 @@ namespace AudioPlayerManager
         public static string ReturnUsages()
         {
             return
-                "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]] [displayName]";
+                "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]]";
         }
 
         public static string ReturnPlaceUsage()
         {
-            return "Usage: audio|audioplayer atplace x y z distance filename/URL displayName";
+            return "Usage: audio|audioplayer atplace x y z distance filename/URL";
         }
 
         public static string ReturnPlayUsage()
         {
-            return "Usage: audio|audioplayer play filename/URL displayName";
+            return "Usage: audio|audioplayer play filename/URL";
         }
     }
 }

@@ -91,11 +91,11 @@
       <HintPath>.\lib\AudioPlayerApi.dll</HintPath>
     </Reference>    
     <Reference Include="NVorbis">
-      <HintPath>C:\Users\Admin\AppData\Roaming\EXILED_beta\Plugins\dependencies\NVorbis.dll</HintPath>
+      <HintPath>.\lib\NVorbis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Memory">
-      <HintPath>C:\Users\Admin\AppData\Roaming\EXILED_beta\Plugins\dependencies\System.Memory.dll</HintPath>
+      <HintPath>.\lib\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="Unity.TextMeshPro">
@@ -114,7 +114,7 @@
       <HintPath>$(EXILED_REFERENCES_BETA)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>C:\Users\Admin\Desktop\Game_Servers\SCPSL_Server_early_build\SCPSL_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>$(EXILED_REFERENCES_BETA)\UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
       <HintPath>packages\ExMod.Exiled.9.6.0-beta8\lib\net48\YamlDotNet.dll</HintPath>
