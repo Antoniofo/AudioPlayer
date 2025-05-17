@@ -29,6 +29,13 @@ namespace AudioPlayerManager
         public override void OnEnabled()
         {
             Instance = this;
+
+            if (!Directory.Exists(Config.AudioFilePath))
+            {
+                Log.Warn("audio directory doesn't exist. Creating...");
+                Directory.CreateDirectory(Config.AudioFilePath);
+            }
+            
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Map.AnnouncingChaosEntrance += OnChaosAnnounce;
