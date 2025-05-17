@@ -17,11 +17,10 @@ namespace AudioPlayerManager
 
         public override string Description => "play/atplace/list/stop an audio";
 
-        public string[] Usage { get; } = new string[3]
+        public string[] Usage { get; } = new string[2]
         {
             "play/list/stop/atplace",
-            "audioName",
-            "displayName"
+            "audioName"
         };
 
         public override void LoadGeneratedCommands()
