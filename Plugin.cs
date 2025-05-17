@@ -29,8 +29,6 @@ namespace AudioPlayerManager
         public override void OnEnabled()
         {
             Instance = this;
-            //AudioClipStorage.LoadClip(Path.Combine(Config.AudioFilePath,Config.MtfSoundFilePath), "mtf");
-            //AudioClipStorage.LoadClip(Path.Combine(Config.AudioFilePath,Config.ChaosSoundFilePath), "chaos");
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Map.AnnouncingChaosEntrance += OnChaosAnnounce;

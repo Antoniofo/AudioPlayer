@@ -74,43 +74,31 @@ namespace AudioPlayerManager
                     return true;
 
                 case "stop":
-                    if (!AudioPlayer.TryGet("Global AudioPlayer", out AudioPlayer aplayer))
+                    bool local = false;
+                    if (arguments.Count > 1)
                     {
-                        response = "No audio player found";
-                        return true;
-                    }
-
-                    aplayer.RemoveAllClips();
-                    /*List<ReferenceHub> listofshit;
-
-                    bool excludeFacilityAnnouncement = true;
-
-                    if (arguments.Count >= 2)
-                    {
-                        if (bool.TryParse(arguments.At(1), out bool includeAllPlayers))
+                        bool.TryParse(arguments.At(1), out bool localtoo);
+                        local = localtoo;
+                        if (localtoo)
                         {
-                            excludeFacilityAnnouncement = !includeAllPlayers;
-                        }
-                    }
+                            foreach (AudioPlayer ap in API.SoundPlayer.audioPlayers)
+                            {
+                                ap.RemoveAllClips();
+                                ap.Destroy();
+                            }
 
-                    if (excludeFacilityAnnouncement)
-                    {
-                        listofshit = API.SoundPlayer.AudioPlayers
-                            .Where(player => !player.nicknameSync.Network_myNickSync.Equals("Facility Announcement"))
-                            .ToList();
+                            API.SoundPlayer.audioPlayers.Clear();
+                        }    
                     }
-                    else
+                    
+                    
+                    if (AudioPlayer.TryGet("Global AudioPlayer", out AudioPlayer aplayer))
                     {
-                        listofshit = API.SoundPlayer.AudioPlayers.ToList();
+                        aplayer.RemoveAllClips();                        
                     }
+                    
 
-                    for (int i = 0; i < listofshit.Count; i++)
-                    {
-                        //var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
-                        //API.SoundPlayer.Stop(audioPlayer);
-                    }*/
-
-                    response = "Audio stopped";
+                    response = local ? "All Audio stopped" : "Global Audio stopped";
                     return true;
 
                 case "atplace":
