@@ -1,13 +1,10 @@
 ﻿using CommandSystem;
 using Exiled.Permissions.Extensions;
-using SCPSLAudioApi.AudioCore;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace AudioPlayer
+namespace AudioPlayerManager
 
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
@@ -20,11 +17,10 @@ namespace AudioPlayer
 
         public override string Description => "play/atplace/list/stop an audio";
 
-        public string[] Usage { get; } = new string[3]
+        public string[] Usage { get; } = new string[2]
         {
             "play/list/stop/atplace",
-            "audioName",
-            "displayName"
+            "audioName"
         };
 
         public override void LoadGeneratedCommands()
@@ -63,124 +59,72 @@ namespace AudioPlayer
                     response = listSound;
                     return true;
                 case "play":
-                    if (arguments.Count < 3)
+                    if (arguments.Count < 2)
                     {
                         response = $"Not enough argument to play a sound\n{ReturnPlayUsage()}";
                         return false;
                     }
 
-                    bool ret;
-                    string displayName = "";
-                    for (int i = 2; i < arguments.Count; i++)
-                    {
-                        displayName += $"{arguments.At(i)} ";
-                    }
+                    string sound = arguments.At(1);
+                    API.SoundPlayer.PlayGlobalAudio(sound, IsUrl(arguments.At(1)));
 
-                    string sound;
 
-                    if (IsUrl(arguments.At(1)))
-                    {
-                        sound = arguments.At(1);
-                        ret = API.SoundPlayer.PlaySound(sound, displayName, 98, true);
-                    }
-                    else
-                    {
-                        sound = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(1));
-                        ret = API.SoundPlayer.PlaySound(sound, displayName, 99, false);
-                    }
+                    response = "Playing ...";
+                    return true;
 
-                    if (ret)
-                    {
-                        response = "Playing ...";
-                        return true;
-                    }
-                    else
-                    {
-                        response = "Last sound not finished or file doesn't exist";
-                        return false;
-                    }
                 case "stop":
-                    List<ReferenceHub> listofshit;
-
-                    bool excludeFacilityAnnouncement = true;
-
-                    if (arguments.Count >= 2)
+                    bool local = false;
+                    if (arguments.Count > 1)
                     {
-                        if (bool.TryParse(arguments.At(1), out bool includeAllPlayers))
+                        bool.TryParse(arguments.At(1), out bool localtoo);
+                        local = localtoo;
+                        if (localtoo)
                         {
-                            excludeFacilityAnnouncement = !includeAllPlayers;
-                        }
-                    }
+                            foreach (AudioPlayer ap in API.SoundPlayer.audioPlayers)
+                            {
+                                ap.RemoveAllClips();
+                                ap.Destroy();
+                            }
 
-                    if (excludeFacilityAnnouncement)
-                    {
-                        listofshit = API.SoundPlayer.AudioPlayers
-                            .Where(player => !player.nicknameSync.Network_myNickSync.Equals("Facility Announcement"))
-                            .ToList();
+                            API.SoundPlayer.audioPlayers.Clear();
+                        }    
                     }
-                    else
+                    
+                    
+                    if (AudioPlayer.TryGet("Global AudioPlayer", out AudioPlayer aplayer))
                     {
-                        listofshit = API.SoundPlayer.AudioPlayers.ToList();
+                        aplayer.RemoveAllClips();                        
                     }
+                    
 
-                    for (int i = 0; i < listofshit.Count; i++)
-                    {
-                        var audioPlayer = AudioPlayerBase.Get(listofshit[i]);
-                        API.SoundPlayer.Stop(audioPlayer);
-                    }
-
-                    response = "Sounds Stoped";
+                    response = local ? "All Audio stopped" : "Global Audio stopped";
                     return true;
 
                 case "atplace":
-                    if (arguments.Count < 7)
+
+                    if (arguments.Count < 6)
                     {
                         response = $"Not enough argument to play a sound\n{ReturnPlaceUsage()}";
                         return false;
                     }
 
                     response = "Failed to parse numbers for position";
-                    if (!int.TryParse(arguments.At(1), out int CoorX))
+                    if (!int.TryParse(arguments.At(1), out int coorX))
                         return false;
-                    if (!int.TryParse(arguments.At(2), out int CoorY))
+                    if (!int.TryParse(arguments.At(2), out int coorY))
                         return false;
-                    if (!int.TryParse(arguments.At(3), out int CoorZ))
+                    if (!int.TryParse(arguments.At(3), out int coorZ))
                         return false;
-                    if (!int.TryParse(arguments.At(4), out int Distance))
+                    if (!int.TryParse(arguments.At(4), out int distance))
                         return false;
 
-                    string soundPlace;
-                    string displayNametest = "";
-                    for (int i = 6; i < arguments.Count; i++)
-                    {
-                        displayNametest += $"{arguments.At(i)} ";
-                    }
+                    string soundPlace = arguments.At(5);
+                    API.SoundPlayer.PlayLocalAudio(soundPlace, IsUrl(arguments.At(1)), new(coorX, coorY, coorZ),
+                        distance);
 
-                    bool retPlace;
-                    if (IsUrl(arguments.At(1)))
-                    {
-                        soundPlace = arguments.At(5);
-                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
-                            displayNametest, 97, true);
-                    }
-                    else
-                    {
-                        soundPlace = Path.Combine(Plugin.Instance.Config.AudioFilePath, arguments.At(5));
-                        retPlace = API.SoundPlayer.PlaySoundAtPlace(soundPlace, new(CoorX, CoorY, CoorZ), Distance,
-                            displayNametest, 96, false);
-                        ;
-                    }
+                    response = $"Playing at {coorX} {coorY} {coorZ} with range of {distance}...";
+                    return true;
 
-                    if (retPlace)
-                    {
-                        response = $"Playing at {CoorX} {CoorY} {CoorZ} with range of {Distance}...";
-                        return true;
-                    }
-                    else
-                    {
-                        response = "Last sound not finished or file doesn't exist";
-                        return false;
-                    }
                 default:
                     response = $"No subcommand recognized\n{ReturnUsages()}";
                     return false;
@@ -197,17 +141,17 @@ namespace AudioPlayer
         public static string ReturnUsages()
         {
             return
-                "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]] [displayName]";
+                "Usage: audio|audioplayer play/list/stop/atplace [[x] [y] [z] [distance]] [[filename/URL]|[true/false]]";
         }
 
         public static string ReturnPlaceUsage()
         {
-            return "Usage: audio|audioplayer atplace x y z distance filename/URL displayName";
+            return "Usage: audio|audioplayer atplace x y z distance filename/URL";
         }
 
         public static string ReturnPlayUsage()
         {
-            return "Usage: audio|audioplayer play filename/URL displayName";
+            return "Usage: audio|audioplayer play filename/URL";
         }
     }
 }

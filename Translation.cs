@@ -1,6 +1,6 @@
 using Exiled.API.Interfaces;
 
-namespace AudioPlayer;
+namespace AudioPlayerManager;
 
 public class Translation : ITranslation
 {

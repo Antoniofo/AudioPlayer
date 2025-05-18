@@ -2,13 +2,13 @@
 using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Server;
-using SCPSLAudioApi.AudioCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Exiled.API.Features.Core.UserSettings;
 using UserSettings.ServerSpecific;
 
-namespace AudioPlayer
+namespace AudioPlayerManager
 {
     public class Plugin : Plugin<Config, Translation>
     {
@@ -16,9 +16,9 @@ namespace AudioPlayer
 
         public override string Name => "AudioPlayer";
 
-        public override Version Version => new Version(2, 3, 2);
+        public override Version Version => new Version(2, 4, 0);
 
-        public override Version RequiredExiledVersion => new Version(9, 5, 0);
+        public override Version RequiredExiledVersion => new Version(9, 6, 0);
 
         public override string Prefix => "audioplayer";
 
@@ -28,17 +28,22 @@ namespace AudioPlayer
 
         public override void OnEnabled()
         {
-            SCPSLAudioApi.Startup.SetupDependencies();
             Instance = this;
+
+            if (!Directory.Exists(Config.AudioFilePath))
+            {
+                Log.Warn("audio directory doesn't exist. Creating...");
+                Directory.CreateDirectory(Config.AudioFilePath);
+            }
+            
             Exiled.Events.Handlers.Server.RespawningTeam += OnRespawnTeam;
-            AudioPlayerBase.OnFinishedTrack += OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance += OnNTFAnnounce;
             Exiled.Events.Handlers.Map.AnnouncingChaosEntrance += OnChaosAnnounce;
-            Exiled.Events.Handlers.Server.RoundStarted += OnRoundStart;
             Exiled.Events.Handlers.Player.Verified += OnVerified;
             IEnumerable<SettingBase> settings = new List<SettingBase>()
             {
-                new TwoButtonsSetting(Config.SettingId, Translation.SettingLabel, Translation.SettingA, Translation.SettingB, true,
+                new TwoButtonsSetting(Config.SettingId, Translation.SettingLabel, Translation.SettingA,
+                    Translation.SettingB, true,
                     Translation.HintDescription, new HeaderSetting("AudioPlayer"))
             };
             SettingBase.Register(settings);
@@ -50,17 +55,11 @@ namespace AudioPlayer
         {
             Instance = null;
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
-            AudioPlayerBase.OnFinishedTrack -= OnFinishedTrack;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
-            Exiled.Events.Handlers.Server.RoundStarted -= OnRoundStart;
             Exiled.Events.Handlers.Player.Verified -= OnVerified;
             base.OnDisabled();
         }
 
-        private void OnRoundStart()
-        {
-            API.SoundPlayer.AudioPlayers.Clear();
-        }
 
         private void OnVerified(VerifiedEventArgs ev)
         {
@@ -76,25 +75,20 @@ namespace AudioPlayer
         private void OnChaosAnnounce(AnnouncingChaosEntranceEventArgs obj)
         {
             if (Config.PlayChaosSound)
-            {
                 obj.IsAllowed = false;
-            }
         }
 
-        private void OnFinishedTrack(AudioPlayerBase playerBase, string track, bool directPlay, ref int nextQueuePos)
-        {
-            API.SoundPlayer.Stop(playerBase);
-        }
+        
 
         private void OnRespawnTeam(RespawningTeamEventArgs ev)
         {
             if (ev.Wave.Faction == PlayerRoles.Faction.FoundationStaff && Config.PlayMtfSound)
             {
-                API.SoundPlayer.PlaySound(Config.MtfSoundFilePath, "Facility Announcement", 998, false);
+                API.SoundPlayer.PlayGlobalAudio("mtf", false);
             }
             else if (ev.Wave.Faction == PlayerRoles.Faction.FoundationEnemy && Config.PlayChaosSound)
             {
-                API.SoundPlayer.PlaySound(Config.ChaosSoundFilePath, "Facility Announcement", 998, false);
+                API.SoundPlayer.PlayGlobalAudio("chaos", false);
             }
         }
     }
