@@ -82,8 +82,11 @@ namespace AudioPlayerManager
                         {
                             foreach (AudioPlayer ap in API.SoundPlayer.audioPlayers)
                             {
-                                ap.RemoveAllClips();
-                                ap.Destroy();
+                                if (ap != null)
+                                {
+                                    ap.RemoveAllClips();
+                                    ap.Destroy();    
+                                }
                             }
 
                             API.SoundPlayer.audioPlayers.Clear();
