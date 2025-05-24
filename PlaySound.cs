@@ -119,7 +119,7 @@ namespace AudioPlayerManager
                         return false;
 
                     string soundPlace = arguments.At(5);
-                    API.SoundPlayer.PlayLocalAudio(soundPlace, IsUrl(arguments.At(1)), new(coorX, coorY, coorZ),
+                    API.SoundPlayer.PlayLocalAudio(soundPlace, IsUrl(soundPlace), new(coorX, coorY, coorZ),
                         distance);
 
                     response = $"Playing at {coorX} {coorY} {coorZ} with range of {distance}...";
