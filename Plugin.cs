@@ -54,8 +54,10 @@ namespace AudioPlayerManager
         public override void OnDisabled()
         {
             Instance = null;
+            SettingBase.Unregister();
             Exiled.Events.Handlers.Server.RespawningTeam -= OnRespawnTeam;
             Exiled.Events.Handlers.Map.AnnouncingNtfEntrance -= OnNTFAnnounce;
+            Exiled.Events.Handlers.Map.AnnouncingChaosEntrance -= OnChaosAnnounce;
             Exiled.Events.Handlers.Player.Verified -= OnVerified;
             base.OnDisabled();
         }
