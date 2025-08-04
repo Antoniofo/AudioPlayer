@@ -24,5 +24,7 @@ namespace AudioPlayerManager
         public float Volume {get; set;} = 20f;*/
         [Description("Change this if it collide with an other plugin")]
         public int SettingId { get; set; } = 668;
+        
+        public int HeaderId { get; set; } = 667;
     }
 }
